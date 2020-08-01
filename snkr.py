@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 # URL = "https://www.nike.com/launch/t/snkrs-classics-1"
 URL = "https://www.nike.com/launch/t/air-jordan-6-neutral-grey"
@@ -12,6 +14,7 @@ class snkr_bot:
         self.section = None
         self.container = None
         self.size_chart = None
+        self.driver = None
 
     def load_page(self) -> bool:
         self.page = requests.get(URL)
@@ -57,16 +60,54 @@ class snkr_bot:
             return False
         return True
 
+    def selenium_setup(self):
+        self.driver = webdriver.Firefox()
+        try:
+            self.driver.get(URL)
+        except Exception as e:
+            print(f"Selenium Setup failed {e}")
+            return False
+        
+    def selenium_purchase(self):
+        my_size_block = driver.find_element_by_xpath(
+            "//*[@id='root']/div/div/div[1]/div/div[3]/div[2]/div/section[2]/div[2]/aside/div/div[2]/div/div[2]/ul/li[1]/button"
+        )
+        if my_size_block is None:
+            return False
+        my_size_block.click()
+
+        add_to_cart = driver.find_element_by_xpath(
+            "/html/body/div[2]/div/div/div[1]/div/div[3]/div[2]/div/section[2]/div[2]/aside/div/div[2]/div/div[2]/div/button"
+        )
+        if add_to_cart is None:
+            return False
+        add_to_cart.click()
+
+        checkout = driver.find_element_by_xpath(
+            "//*[@id='root']/div/div/div[2]/div/div/div/div/div[3]/button[2]"
+        )
+        if checkout is None:
+            return False
+        checkout.click()
+
+sign_in_email = driver.find_element_by_id("8fc66541-2c3d-49be-8811-b389e4641487")
+sign_in_email.send_keys("hello")
+        
+
 
 def main():
     bot = snkr_bot()
     if bot.setup() is False:
         return
 
-    if bot.is_buyable():
-        print("buyable")
-    else:
-        print("WAIT WAIT")
+    while(True):
+        if bot.is_buyable():
+            if bot.selenium_setup():
+                bot.selenium_purchase()
+            else:
+                break
+        else:
+            continue
 
 
 if __name__ == "__main__":
